@@ -17,7 +17,14 @@
  */
 struct list_head *q_new()
 {
-    return NULL;
+    element_t *q = malloc(sizeof(element_t));
+    if (q == NULL) {
+        return NULL;
+    }
+    q->value = NULL;
+    q->list.next = &q->list;
+    q->list.prev = &q->list;
+    return &q->list;
 }
 
 /* Free all storage used by queue */
