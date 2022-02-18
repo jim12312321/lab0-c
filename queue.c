@@ -183,7 +183,35 @@ int q_size(struct list_head *head)
  */
 bool q_delete_mid(struct list_head *head)
 {
-    // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+    if (head == NULL || list_empty(head) != 0) {
+        return false;
+    }
+
+    if (list_is_singular(head)) {
+        head = head->next;
+        // cppcheck-suppress nullPointer
+        element_t *e = container_of(head, element_t, list);
+        list_del(head);
+        q_release_element(e);
+        return true;
+    }
+
+    int del_n_index = 0;
+    struct list_head *node = head->next;
+    /* even nodes  */
+    if (q_size(node) % 2 == 0) {
+        del_n_index = q_size(node) / 2;
+    } else { /* odd nodes  */
+        del_n_index = (q_size(node) + 1) / 2 - 1;
+    }
+    while (del_n_index > 0) {
+        node = node->next;
+        del_n_index--;
+    }
+    // cppcheck-suppress nullPointer
+    element_t *e = container_of(node, element_t, list);
+    list_del(node);
+    q_release_element(e);
     return true;
 }
 
