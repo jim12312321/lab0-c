@@ -18,18 +18,16 @@
 struct list_head *q_new()
 {
     element_t *q = malloc(sizeof(element_t));
-    if (q == NULL) {
+    if (!q)
         return NULL;
-    }
     INIT_LIST_HEAD(&q->list);
     return &q->list;
 }
 /* Free all storage used by queue */
 void q_free(struct list_head *l)
 {
-    if (l == NULL) {
+    if (!l)
         return;
-    }
     struct list_head *node = l->next;
     while (node != l) {
         // cppcheck-suppress nullPointer
@@ -51,10 +49,11 @@ void q_free(struct list_head *l)
  */
 bool q_insert_head(struct list_head *head, char *s)
 {
-    element_t *q = malloc(sizeof(element_t));
-    if (q == NULL || head == NULL) {
+    if (!head)
         return false;
-    }
+    element_t *q = malloc(sizeof(element_t));
+    if (!q)
+        return false;
     int charsize = 0;
     while (*(s + charsize))
         charsize += 1;
@@ -78,10 +77,11 @@ bool q_insert_head(struct list_head *head, char *s)
  */
 bool q_insert_tail(struct list_head *head, char *s)
 {
-    element_t *q = malloc(sizeof(element_t));
-    if (q == NULL || head == NULL) {
+    if (!head)
         return false;
-    }
+    element_t *q = malloc(sizeof(element_t));
+    if (!q)
+        return false;
     int charsize = 0;
     while (*(s + charsize))
         charsize += 1;
@@ -112,12 +112,10 @@ bool q_insert_tail(struct list_head *head, char *s)
  */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (head == NULL || list_empty(head) != 0) {
+    if (!head || list_empty(head))
         return NULL;
-    }
-    if (sp == NULL) {
+    if (!sp)
         return NULL;
-    }
     // cppcheck-suppress nullPointer
     element_t *cur_e = list_entry(head->next, element_t, list);
     list_del_init(head->next);
@@ -132,12 +130,10 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
  */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (head == NULL || list_empty(head) != 0) {
+    if (!head || list_empty(head))
         return NULL;
-    }
-    if (sp == NULL) {
+    if (!sp)
         return NULL;
-    }
     // cppcheck-suppress nullPointer
     element_t *cur_e = list_entry(head->prev, element_t, list);
     list_del_init(head->prev);
@@ -183,9 +179,8 @@ int q_size(struct list_head *head)
  */
 bool q_delete_mid(struct list_head *head)
 {
-    if (head == NULL || list_empty(head) != 0) {
+    if (!head || list_empty(head))
         return false;
-    }
 
     if (list_is_singular(head)) {
         head = head->next;
@@ -260,6 +255,8 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     struct list_head *odd, *even;
+    if (!head)
+        return;
     odd = head->next;
     even = odd->next;
     while (true) {
@@ -288,9 +285,8 @@ void q_swap(struct list_head *head)
  */
 void q_reverse(struct list_head *head)
 {
-    if (head == NULL || list_empty(head) != 0) {
+    if (!head || list_empty(head))
         return;
-    }
     struct list_head *node, *temp;
     for (node = head->next; node != head; node = node->prev) {
         temp = node->next;
@@ -396,9 +392,8 @@ struct list_head *merge(struct list_head *left, struct list_head *right)
 
 struct list_head *mergesort(struct list_head *head)
 {
-    if (head->next == head) {
+    if (head->next == head)
         return head;
-    }
     int mid_index = q_size(head) / 2;
     struct list_head *mid, *temp = head;
     while (mid_index > 0) {
@@ -417,9 +412,8 @@ struct list_head *mergesort(struct list_head *head)
 
 void q_sort(struct list_head *head)
 {
-    if (head == NULL || list_empty(head) != 0 || list_is_singular(head) != 0) {
+    if (!head || list_empty(head) || list_is_singular(head))
         return;
-    }
     struct list_head *node = head->next;
 
     node->prev = head->prev;
