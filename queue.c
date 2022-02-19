@@ -266,4 +266,130 @@ void q_reverse(struct list_head *head)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-void q_sort(struct list_head *head) {}
+struct list_head *merge(struct list_head *left, struct list_head *right)
+{
+    struct list_head *head, *cur;
+
+    // cppcheck-suppress nullPointer
+    char *lstr = list_entry(left, element_t, list)->value;
+    // cppcheck-suppress nullPointer
+    char *rstr = list_entry(right, element_t, list)->value;
+
+    int cmp = strcmp(lstr, rstr);
+    if (cmp > 0) {  // left > right
+        head = right;
+        right = right->next;
+        right->prev = head->prev;
+        right->prev->next = right;
+        head->next = head;
+        head->prev = head;
+    } else {  // left <= right
+        head = left;
+        left = left->next;
+        left->prev = head->prev;
+        left->prev->next = left;
+        head->next = head;
+        head->prev = head;
+    }
+    cur = head;
+
+    if (head == left) {
+        left = NULL;
+    } else if (head == right) {
+        right = NULL;
+    }
+
+    while (true) {
+        if (left == NULL) {
+            cur->next = right;
+            head->prev = right->prev;
+            right->prev->next = head;
+            right->prev = cur;
+            break;
+        } else if (right == NULL) {
+            cur->next = left;
+            head->prev = left->prev;
+            left->prev->next = head;
+            left->prev = cur;
+            break;
+        }
+        // cppcheck-suppress nullPointer
+        lstr = list_entry(left, element_t, list)->value;
+        // cppcheck-suppress nullPointer
+        rstr = list_entry(right, element_t, list)->value;
+        cmp = strcmp(lstr, rstr);
+
+        if (cmp > 0) {  // left > right
+            cur->next = right;
+            if (q_size(right) == 0) {
+                right->prev = cur;
+                right = NULL;
+            } else {
+                right = right->next;
+                right->prev = right->prev->prev;
+                right->prev->next = right;
+                cur->next->prev = cur;
+            }
+            cur = cur->next;
+            cur->next = head;
+            head->prev = cur;
+        } else {  // left <= right
+            cur->next = left;
+            if (q_size(left) == 0) {
+                left->prev = cur;
+                left = NULL;
+            } else {
+                left = left->next;
+                left->prev = left->prev->prev;
+                left->prev->next = left;
+                cur->next->prev = cur;
+            }
+            cur = cur->next;
+            cur->next = head;
+            head->prev = cur;
+        }
+    }
+
+    return head;
+}
+
+struct list_head *mergesort(struct list_head *head)
+{
+    if (head->next == head) {
+        return head;
+    }
+    int mid_index = q_size(head) / 2;
+    struct list_head *mid, *temp = head;
+    while (mid_index > 0) {
+        temp = temp->next;
+        mid_index--;
+    }
+    mid = temp->next;
+    temp->next = head;
+    mid->prev = head->prev;
+    head->prev->next = mid;
+    head->prev = temp;
+
+    struct list_head *left = mergesort(head), *right = mergesort(mid);
+    return merge(left, right);
+}
+
+void q_sort(struct list_head *head)
+{
+    if (head == NULL || list_empty(head) != 0 || list_is_singular(head) != 0) {
+        return;
+    }
+    struct list_head *node = head->next;
+
+    node->prev = head->prev;
+    node->prev->next = node;
+    head->prev = NULL;
+    head->next = NULL;
+
+    node = mergesort(node);
+
+    head->next = node;
+    head->prev = node->prev;
+    node->prev->next = head;
+    node->prev = head;
+}
