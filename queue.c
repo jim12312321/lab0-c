@@ -331,7 +331,7 @@ struct list_head *mergesort(struct list_head *head)
 
     struct list_head *fast = head, *slow = head, *mid;
     while (true) {
-        if (fast->next == NULL || fast->next->next == NULL)
+        if (!fast->next || !fast->next->next)
             break;
         fast = fast->next->next;
         slow = slow->next;
