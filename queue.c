@@ -192,21 +192,18 @@ bool q_delete_mid(struct list_head *head)
         return true;
     }
 
-    int del_n_index = 0;
-    struct list_head *node = head->next;
-    /* even nodes  */
-    if (q_size(node) % 2 == 0) {
-        del_n_index = q_size(node) / 2;
-    } else { /* odd nodes  */
-        del_n_index = (q_size(node) + 1) / 2 - 1;
+    struct list_head *fast = head, *slow = head;
+    while (true) {
+        if (fast->next == head || fast->next->next == head)
+            break;
+        fast = fast->next->next;
+        slow = slow->next;
     }
-    while (del_n_index > 0) {
-        node = node->next;
-        del_n_index--;
-    }
+    slow = slow->next;
+
     // cppcheck-suppress nullPointer
-    element_t *e = container_of(node, element_t, list);
-    list_del(node);
+    element_t *e = container_of(slow, element_t, list);
+    list_del(slow);
     q_release_element(e);
     return true;
 }
@@ -319,6 +316,7 @@ struct list_head *mergeTwoLists(struct list_head *left, struct list_head *right)
         *ptr = *node;
         ptr = &(*ptr)->next;
     }
+
     *ptr = (struct list_head *) ((uintptr_t) left | (uintptr_t) right);
 
     return head;
